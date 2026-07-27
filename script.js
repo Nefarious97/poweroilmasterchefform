@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalTitle = document.getElementById('modalTitle');
     const modalDesc = document.getElementById('modalDesc');
 
+    const INSTAGRAM_LANDING_PAGE = 'https://www.instagram.com/poweroilng?igsh=Z3kyeWNzaTJzNzlk';
+    let redirectTimer = null;
+
     let selectedAnswer = null;
 
     // Toast Notification helper
@@ -20,6 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             toast.classList.remove('show');
         }, 3800);
+    }
+
+    // Redirect to Power Oil Instagram Landing Page
+    function navigateToLandingPage() {
+        if (redirectTimer) clearTimeout(redirectTimer);
+        window.location.href = INSTAGRAM_LANDING_PAGE;
     }
 
     // Toggle Yes / No Selection
@@ -252,6 +261,9 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             rewardModal.classList.add('active');
             rewardModal.setAttribute('aria-hidden', 'false');
+
+            // Auto-redirect duplicate users after 4 seconds as well
+            redirectTimer = setTimeout(navigateToLandingPage, 4000);
             return;
         }
 
@@ -266,20 +278,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         rewardModal.classList.add('active');
         rewardModal.setAttribute('aria-hidden', 'false');
+
+        // Auto-redirect user to Power Oil Instagram landing page after 4.5 seconds
+        redirectTimer = setTimeout(navigateToLandingPage, 4500);
     });
 
-    // Close Modal Handler
+    // Close / Action Button Handler -> Redirects to Instagram Landing Page
     closeModalBtn.addEventListener('click', () => {
-        rewardModal.classList.remove('active');
-        rewardModal.setAttribute('aria-hidden', 'true');
-
-        // Reset Form
-        form.reset();
-        selectedAnswer = null;
-        knowsChallengeInput.value = '';
-        btnYes.classList.remove('selected');
-        btnNo.classList.remove('selected');
-        btnYes.setAttribute('aria-pressed', 'false');
-        btnNo.setAttribute('aria-pressed', 'false');
+        navigateToLandingPage();
     });
 });
