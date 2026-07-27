@@ -44,43 +44,19 @@ const MIME_TYPES = {
     '.ttf': 'font/ttf'
 };
 
-// Helper: Post submission data to Google Sheet Webhook
-function postToGoogleSheet(sheetUrlStr, payload) {
+// Helper: Post submission data to Google Sheet Webhook via native fetch
+async function postToGoogleSheet(sheetUrlStr, payload) {
     if (!sheetUrlStr) return;
     try {
-        const parsed = url.parse(sheetUrlStr);
-        const postData = JSON.stringify(payload);
-
-        const reqOpts = {
-            hostname: parsed.hostname,
-            port: parsed.port || 443,
-            path: parsed.path,
+        const response = await fetch(sheetUrlStr, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(postData)
-            }
-        };
-
-        const sheetReq = https.request(reqOpts, (sheetRes) => {
-            console.log('[Google Sheet Log Status]:', sheetRes.statusCode);
-            // Handle redirect if Google Apps Script redirects (302)
-            if (sheetRes.statusCode === 302 || sheetRes.statusCode === 301) {
-                const redirectUrl = sheetRes.headers.location;
-                if (redirectUrl) {
-                    postToGoogleSheet(redirectUrl, payload);
-                }
-            }
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
-
-        sheetReq.on('error', (err) => {
-            console.warn('[Google Sheet Log Error]:', err.message);
-        });
-
-        sheetReq.write(postData);
-        sheetReq.end();
+        const resultText = await response.text();
+        console.log('[Google Sheet Log Result]:', response.status, resultText);
     } catch (err) {
-        console.warn('[Google Sheet Exception]:', err.message);
+        console.warn('[Google Sheet Log Error]:', err.message);
     }
 }
 
@@ -169,7 +145,7 @@ const server = http.createServer((req, res) => {
                         walletBalance: jsonResp.walletbalance
                     };
 
-                    // Automatically save submission data to Google Sheet if URL is configured
+                    // Automatically post submission to Google Sheet Webhook
                     const googleSheetUrl = process.env.GOOGLE_SHEET_WEBHOOK_URL;
                     if (googleSheetUrl) {
                         postToGoogleSheet(googleSheetUrl, {
