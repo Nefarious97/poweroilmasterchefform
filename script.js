@@ -262,8 +262,8 @@ document.addEventListener('DOMContentLoaded', () => {
             rewardModal.classList.add('active');
             rewardModal.setAttribute('aria-hidden', 'false');
 
-            // Auto-redirect duplicate users after 4 seconds as well
-            redirectTimer = setTimeout(navigateToLandingPage, 4000);
+            // Auto-redirect duplicate users after 2 seconds
+            redirectTimer = setTimeout(navigateToLandingPage, 2000);
             return;
         }
 
@@ -279,8 +279,8 @@ document.addEventListener('DOMContentLoaded', () => {
         rewardModal.classList.add('active');
         rewardModal.setAttribute('aria-hidden', 'false');
 
-        // Auto-redirect user to Power Oil Instagram landing page after 4.5 seconds
-        redirectTimer = setTimeout(navigateToLandingPage, 4500);
+        // Auto-redirect user to Power Oil Instagram landing page after 2 seconds
+        redirectTimer = setTimeout(navigateToLandingPage, 2000);
     });
 
     // Close / Action Button Handler -> Redirects to Instagram Landing Page
