@@ -45,6 +45,19 @@ body {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
 }
 
+/* Top Right DT Logo Overlay */
+.dt-logo {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 28px;
+    height: auto;
+    object-fit: contain;
+    z-index: 50;
+    pointer-events: none;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+}
+
 /* Header Section Overlay */
 .copy-headline {
     position: absolute;
