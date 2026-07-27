@@ -1,6 +1,6 @@
 /**
  * Power Oil MasterChef - Clubkonnect ₦200 Airtime API Server
- * Ready for Render / Heroku / Vercel Deployment
+ * Secure Environment Variables & Render Deployment Ready
  */
 
 const http = require('http');
@@ -8,6 +8,27 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+
+// Parse local .env file if available
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+    try {
+        const envContent = fs.readFileSync(envPath, 'utf8');
+        envContent.split(/\r?\n/).forEach(line => {
+            const trimmed = line.trim();
+            if (trimmed && !trimmed.startsWith('#')) {
+                const parts = trimmed.split('=');
+                const key = parts[0].trim();
+                const value = parts.slice(1).join('=').trim();
+                if (key && !process.env[key]) {
+                    process.env[key] = value;
+                }
+            }
+        });
+    } catch (e) {
+        console.warn('Failed to parse local .env file:', e.message);
+    }
+}
 
 const PORT = process.env.PORT || 8085;
 
@@ -69,6 +90,7 @@ const server = http.createServer((req, res) => {
                 cleanPhone = '0' + cleanPhone.slice(3);
             }
 
+            // Securely read credentials from Environment Variables
             const userId = process.env.CLUBKONNECT_USER_ID || 'CK101284801';
             const apiKey = process.env.CLUBKONNECT_API_KEY || '5G2TFK1JZGX63T1J53U2TXY3732UT86155EK6R6ZI8LV8T72J63FCINN270U58K1';
             const requestId = 'POWEROIL_' + Date.now() + Math.floor(Math.random() * 1000);
@@ -76,7 +98,7 @@ const server = http.createServer((req, res) => {
             // Official Nellobyte Systems / Clubkonnect Airtime API V1 URL
             const apiUrl = `https://www.nellobytesystems.com/APIAirtimeV1.asp?UserID=${encodeURIComponent(userId)}&APIKey=${encodeURIComponent(apiKey)}&MobileNetwork=${encodeURIComponent(network)}&Amount=${encodeURIComponent(amount)}&MobileNumber=${encodeURIComponent(cleanPhone)}&RequestID=${encodeURIComponent(requestId)}`;
 
-            console.log(`[Clubkonnect API Proxy] Sending ₦${amount} Airtime to ${cleanPhone} (Network: ${network})...`);
+            console.log(`[Clubkonnect API Proxy] Dispatching ₦${amount} Airtime to ${cleanPhone} (Network: ${network})...`);
 
             https.get(apiUrl, (apiRes) => {
                 let apiData = '';

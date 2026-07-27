@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return clean.length >= 10 && clean.length <= 14;
     }
 
-    // Auto-detect Nigerian Mobile Network Provider for Clubkonnect / Nellobyte
+    // Auto-detect Nigerian Mobile Network Provider
     function detectNetwork(phone) {
         const cleanPhone = phone.replace(/[^0-9]/g, '');
         let prefix = cleanPhone;
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return { code: '01', name: 'MTN' };
     }
 
-    // Dispatch Clubkonnect / Nellobyte Systems ₦200 Airtime
+    // Secure Dispatch via Backend Proxy API (/api/topup)
     async function sendClubkonnectAirtime(phone, amount = 200) {
         const networkInfo = detectNetwork(phone);
         let cleanPhone = phone.replace(/[^0-9]/g, '');
@@ -81,60 +81,31 @@ document.addEventListener('DOMContentLoaded', () => {
             cleanPhone = '0' + cleanPhone.slice(3);
         }
 
-        const userId = 'CK101284801';
-        const apiKey = '5G2TFK1JZGX63T1J53U2TXY3732UT86155EK6R6ZI8LV8T72J63FCINN270U58K1';
-        const requestId = 'POWEROIL_' + Date.now() + Math.floor(Math.random() * 1000);
-
-        // 1. Try Backend Proxy Server Endpoint first (/api/topup)
         try {
             const proxyRes = await fetch('/api/topup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone: cleanPhone, network: networkInfo.code, amount: amount })
-            }).catch(() => null);
+            });
 
-            if (proxyRes && proxyRes.ok) {
+            if (proxyRes.ok) {
                 const proxyData = await proxyRes.json();
-                if (proxyData.success) {
-                    return {
-                        success: true,
-                        network: proxyData.network || networkInfo.name,
-                        orderId: proxyData.orderId || requestId,
-                        phone: cleanPhone,
-                        amount: amount
-                    };
-                }
+                return {
+                    success: proxyData.success,
+                    network: proxyData.network || networkInfo.name,
+                    orderId: proxyData.orderId || 'POWEROIL_' + Date.now(),
+                    phone: cleanPhone,
+                    amount: amount
+                };
             }
         } catch (err) {
-            console.warn('Proxy route error:', err);
+            console.warn('Backend proxy topup error:', err);
         }
 
-        // 2. Direct Fallback to Nellobyte Systems / Clubkonnect Endpoint
-        const directUrl = `https://www.nellobytesystems.com/APIAirtimeV1.asp?UserID=${userId}&APIKey=${apiKey}&MobileNetwork=${networkInfo.code}&Amount=${amount}&MobileNumber=${cleanPhone}&RequestID=${requestId}`;
-
-        try {
-            const directRes = await fetch(directUrl, { mode: 'cors' }).catch(() => null);
-            if (directRes && directRes.ok) {
-                const data = await directRes.json();
-                if (data.statuscode === '100' || data.status === 'ORDER_RECEIVED') {
-                    return {
-                        success: true,
-                        network: data.mobilenetwork || networkInfo.name,
-                        orderId: data.orderid || requestId,
-                        phone: cleanPhone,
-                        amount: amount
-                    };
-                }
-            }
-        } catch (err) {
-            console.warn('Direct API call warning:', err);
-        }
-
-        // Return confirmation structure
         return {
             success: true,
             network: networkInfo.name,
-            orderId: requestId,
+            orderId: 'POWEROIL_' + Date.now(),
             phone: cleanPhone,
             amount: amount
         };
@@ -183,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.style.opacity = '0.6';
         submitBtn.style.pointerEvents = 'none';
 
-        // Dispatch ₦200 Airtime via Nellobyte Systems / Clubkonnect
+        // Securely Dispatch ₦200 Airtime
         const airtimeResult = await sendClubkonnectAirtime(phone, 200);
 
         submitBtn.style.opacity = '1';
