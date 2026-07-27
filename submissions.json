@@ -1,8 +1,10 @@
 {
   "phones": [
-    "08031234567"
+    "08031234567",
+    "08140998877"
   ],
   "emails": [
-    "unique_email@test.com"
+    "unique_email@test.com",
+    "verification@poweroil.com"
   ]
 }

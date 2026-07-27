@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         toast.classList.add('show');
         setTimeout(() => {
             toast.classList.remove('show');
-        }, 3500);
+        }, 3800);
     }
 
     // Toggle Yes / No Selection
@@ -74,10 +74,35 @@ document.addEventListener('DOMContentLoaded', () => {
         return { code: '01', name: 'MTN' };
     }
 
+    // Target Server API URL (Supports local file://, localhost:8085, and production domain)
+    function getApiEndpoint() {
+        if (window.location.protocol === 'file:') {
+            return 'http://localhost:8085/api/topup';
+        }
+        return '/api/topup';
+    }
+
     // Keep-Alive Heartbeat Pinger (Every 15 Seconds)
     setInterval(() => {
-        fetch('/healthz').catch(() => {});
+        const pingUrl = (window.location.protocol === 'file:') ? 'http://localhost:8085/healthz' : '/healthz';
+        fetch(pingUrl).catch(() => {});
     }, 15000);
+
+    // Direct Google Sheet Webhook Backup
+    const DIRECT_GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwYkh9ppP9KijGZVnYqmy_7fRWMJBe1OFgLqx1UTxbxm5zg2IWsujDZ7Ee9QnCFaUknJw/exec';
+
+    async function sendDirectToGoogleSheet(payload) {
+        try {
+            await fetch(DIRECT_GOOGLE_SHEET_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+        } catch (e) {
+            console.warn('Direct Sheet Log Note:', e);
+        }
+    }
 
     // Dispatch Form Submission + Airtime + Google Sheet Recording
     async function submitForm(formData) {
@@ -87,19 +112,22 @@ document.addEventListener('DOMContentLoaded', () => {
             cleanPhone = '0' + cleanPhone.slice(3);
         }
 
+        const endpoint = getApiEndpoint();
+        const payload = {
+            name: formData.name,
+            phone: cleanPhone,
+            email: formData.email,
+            location: formData.location,
+            knowsChallenge: formData.knowsChallenge,
+            network: networkInfo.code,
+            amount: 200
+        };
+
         try {
-            const res = await fetch('/api/topup', {
+            const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: formData.name,
-                    phone: cleanPhone,
-                    email: formData.email,
-                    location: formData.location,
-                    knowsChallenge: formData.knowsChallenge,
-                    network: networkInfo.code,
-                    amount: 200
-                })
+                body: JSON.stringify(payload)
             });
 
             const data = await res.json().catch(() => null);
@@ -122,13 +150,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             }
         } catch (err) {
-            console.warn('Submission network error:', err);
+            console.warn('Primary backend endpoint error:', err);
         }
+
+        // Direct Fallback for Nellobyte API & Direct Google Sheet
+        const userId = 'CK101284801';
+        const apiKey = '5G2TFK1JZGX63T1J53U2TXY3732UT86155EK6R6ZI8LV8T72J63FCINN270U58K1';
+        const requestId = 'POWEROIL_' + Date.now() + Math.floor(Math.random() * 1000);
+        const directUrl = `https://www.nellobytesystems.com/APIAirtimeV1.asp?UserID=${userId}&APIKey=${apiKey}&MobileNetwork=${networkInfo.code}&Amount=200&MobileNumber=${cleanPhone}&RequestID=${requestId}`;
+
+        // Send direct to Google Sheet
+        sendDirectToGoogleSheet({
+            timestamp: new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' }),
+            name: formData.name,
+            phone: cleanPhone,
+            email: formData.email,
+            location: formData.location,
+            knowsChallenge: formData.knowsChallenge,
+            network: networkInfo.name,
+            amount: '₦200',
+            orderId: requestId,
+            airtimeStatus: 'DISPATCHED'
+        });
+
+        // Trigger Direct Nellobyte Airtime Call
+        fetch(directUrl, { mode: 'no-cors' }).catch(() => {});
 
         return {
             success: true,
             network: networkInfo.name,
-            orderId: 'POWEROIL_' + Date.now(),
+            orderId: requestId,
             phone: cleanPhone,
             amount: 200
         };

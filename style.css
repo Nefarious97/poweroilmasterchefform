@@ -48,9 +48,9 @@ body {
 /* Top Right DT Logo Overlay */
 .dt-logo {
     position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 28px;
+    top: 0px;
+    right: 0px;
+    width: 25px;
     height: auto;
     object-fit: contain;
     z-index: 50;
