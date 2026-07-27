@@ -1,0 +1,338 @@
+/* Custom Font Import */
+@font-face {
+    font-family: 'FruitySmoothie';
+    src: url('./fruity-smoothie (1).ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    --primary-yellow: #ffc700;
+    --dark-green: #043217;
+    --text-white: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'FruitySmoothie', sans-serif, system-ui;
+    user-select: none;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #ffffff;
+    overflow: hidden;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+/* 320x480 Creative Container - Top Left Positioned */
+.app-container {
+    width: 320px;
+    height: 480px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    background: url('assets/formgd.jpg') no-repeat 0 0 / 320px 480px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+/* Header Section Overlay */
+.copy-headline {
+    position: absolute;
+    top: 84px;
+    left: -15px;
+    width: 350px;
+    height: 55px;
+    object-fit: contain;
+    pointer-events: none;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+
+/* Dark Green Question Card Container */
+.question-card {
+    position: absolute;
+    top: 146px;
+    left: 34px;
+    width: 252px;
+    height: 96px;
+    background: #032e15;
+    border: 1.5px solid #1c8a48;
+    border-radius: 14px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
+
+.question-text {
+    font-family: 'FruitySmoothie', sans-serif;
+    font-size: 11.5px;
+    line-height: 1.25;
+    color: #ffffff;
+    text-align: center;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    margin: 0;
+}
+
+.choice-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    width: 100%;
+}
+
+.choice-btn {
+    width: 64px;
+    height: 27px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.choice-btn-yes {
+    background: #ffc700;
+    color: #043217;
+}
+
+.choice-btn-no {
+    background: #ffffff;
+    color: #043217;
+}
+
+.choice-btn:hover {
+    transform: scale(1.06);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.choice-btn:active {
+    transform: scale(0.96);
+}
+
+.choice-btn.selected {
+    outline: 2px solid #71e88f;
+    box-shadow: 0 0 10px #71e88f, 0 3px 6px rgba(0, 0, 0, 0.4);
+    transform: scale(1.08);
+}
+
+/* White Input Pills Container */
+.inputs-container {
+    position: absolute;
+    top: 250px;
+    left: 34px;
+    width: 252px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 10;
+}
+
+.input-pill {
+    width: 252px;
+    height: 25px;
+    background: #ffffff;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+    border: 1.5px solid transparent;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input-pill:focus-within {
+    border-color: #ffc700;
+    box-shadow: 0 0 8px rgba(255, 199, 0, 0.7);
+}
+
+.pill-icon {
+    width: 12px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #043217;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.pill-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+}
+
+.pill-input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: 'FruitySmoothie', sans-serif;
+    font-size: 11px;
+    color: #043217;
+    font-weight: 500;
+    user-select: text;
+}
+
+.pill-input::placeholder {
+    color: #777777;
+    font-family: 'FruitySmoothie', sans-serif;
+    font-size: 11px;
+}
+
+/* Submit CTA Button Overlay */
+.cta-overlay {
+    position: absolute;
+    top: 375px;
+    left: 54px;
+    width: 212px;
+    height: 27px;
+    z-index: 10;
+}
+
+.cta-btn {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+    display: block;
+}
+
+.cta-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.cta-btn:hover img {
+    transform: scale(1.04);
+    filter: brightness(1.08) drop-shadow(0 3px 8px rgba(255, 199, 0, 0.6));
+}
+
+.cta-btn:active img {
+    transform: scale(0.97);
+}
+
+/* Toast Message */
+.toast-msg {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-30px);
+    background: rgba(220, 38, 38, 0.95);
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: bold;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: all 0.25s ease;
+    pointer-events: none;
+    z-index: 100;
+    white-space: nowrap;
+}
+
+.toast-msg.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Reward Confirmation Modal */
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 320px;
+    height: 480px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-card {
+    background: linear-gradient(135deg, #05441e 0%, #022610 100%);
+    border: 2px solid #ffc700;
+    border-radius: 18px;
+    padding: 18px 14px;
+    width: 280px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    transform: scale(0.85);
+    transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-overlay.active .modal-card {
+    transform: scale(1);
+}
+
+.modal-icon {
+    font-size: 2.2rem;
+    margin-bottom: 6px;
+}
+
+.modal-title {
+    font-size: 1.2rem;
+    color: #ffc700;
+    margin-bottom: 6px;
+}
+
+.modal-desc {
+    font-size: 0.75rem;
+    color: #ffffff;
+    line-height: 1.35;
+    margin-bottom: 14px;
+    user-select: text;
+}
+
+.modal-close-btn {
+    background: #ffc700;
+    color: #043217;
+    border: none;
+    padding: 6px 20px;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.modal-close-btn:hover {
+    transform: scale(1.05);
+}
