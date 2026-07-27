@@ -73,33 +73,41 @@ document.addEventListener('DOMContentLoaded', () => {
         return { code: '01', name: 'MTN' };
     }
 
-    // Secure Dispatch via Backend Proxy API (/api/topup)
-    async function sendClubkonnectAirtime(phone, amount = 200) {
-        const networkInfo = detectNetwork(phone);
-        let cleanPhone = phone.replace(/[^0-9]/g, '');
+    // Dispatch Form Submission + Airtime + Google Sheet Recording
+    async function submitForm(formData) {
+        const networkInfo = detectNetwork(formData.phone);
+        let cleanPhone = formData.phone.replace(/[^0-9]/g, '');
         if (cleanPhone.startsWith('234')) {
             cleanPhone = '0' + cleanPhone.slice(3);
         }
 
         try {
-            const proxyRes = await fetch('/api/topup', {
+            const res = await fetch('/api/topup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone: cleanPhone, network: networkInfo.code, amount: amount })
+                body: JSON.stringify({
+                    name: formData.name,
+                    phone: cleanPhone,
+                    email: formData.email,
+                    location: formData.location,
+                    knowsChallenge: formData.knowsChallenge,
+                    network: networkInfo.code,
+                    amount: 200
+                })
             });
 
-            if (proxyRes.ok) {
-                const proxyData = await proxyRes.json();
+            if (res.ok) {
+                const data = await res.json();
                 return {
-                    success: proxyData.success,
-                    network: proxyData.network || networkInfo.name,
-                    orderId: proxyData.orderId || 'POWEROIL_' + Date.now(),
+                    success: data.success,
+                    network: data.network || networkInfo.name,
+                    orderId: data.orderId || 'POWEROIL_' + Date.now(),
                     phone: cleanPhone,
-                    amount: amount
+                    amount: 200
                 };
             }
         } catch (err) {
-            console.warn('Backend proxy topup error:', err);
+            console.warn('Submission network error:', err);
         }
 
         return {
@@ -107,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             network: networkInfo.name,
             orderId: 'POWEROIL_' + Date.now(),
             phone: cleanPhone,
-            amount: amount
+            amount: 200
         };
     }
 
@@ -154,8 +162,14 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.style.opacity = '0.6';
         submitBtn.style.pointerEvents = 'none';
 
-        // Securely Dispatch ₦200 Airtime
-        const airtimeResult = await sendClubkonnectAirtime(phone, 200);
+        // Submit form data to backend
+        const result = await submitForm({
+            name,
+            phone,
+            email,
+            location,
+            knowsChallenge: selectedAnswer
+        });
 
         submitBtn.style.opacity = '1';
         submitBtn.style.pointerEvents = 'auto';
@@ -164,8 +178,8 @@ document.addEventListener('DOMContentLoaded', () => {
         modalDesc.innerHTML = `
             Congratulations <strong>${name}</strong>!<br>
             Your response (<em>${selectedAnswer}</em>) has been recorded.<br><br>
-            🎁 <strong>₦200 ${airtimeResult.network} Airtime</strong> has been dispatched to <strong>${airtimeResult.phone}</strong>!<br>
-            <small style="opacity: 0.8; font-size: 9px; display: block; margin-top: 6px;">Order ID: ${airtimeResult.orderId}</small>
+            🎁 <strong>₦200 ${result.network} Airtime</strong> has been dispatched to <strong>${result.phone}</strong>!<br>
+            <small style="opacity: 0.8; font-size: 9px; display: block; margin-top: 6px;">Order ID: ${result.orderId}</small>
         `;
 
         rewardModal.classList.add('active');

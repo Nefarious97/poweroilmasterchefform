@@ -1,6 +1,5 @@
 /**
- * Power Oil MasterChef - Clubkonnect ₦200 Airtime API Server
- * Secure Environment Variables & Render Deployment Ready
+ * Power Oil MasterChef - Clubkonnect Airtime API & Google Sheet Integration Server
  */
 
 const http = require('http');
@@ -45,6 +44,46 @@ const MIME_TYPES = {
     '.ttf': 'font/ttf'
 };
 
+// Helper: Post submission data to Google Sheet Webhook
+function postToGoogleSheet(sheetUrlStr, payload) {
+    if (!sheetUrlStr) return;
+    try {
+        const parsed = url.parse(sheetUrlStr);
+        const postData = JSON.stringify(payload);
+
+        const reqOpts = {
+            hostname: parsed.hostname,
+            port: parsed.port || 443,
+            path: parsed.path,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(postData)
+            }
+        };
+
+        const sheetReq = https.request(reqOpts, (sheetRes) => {
+            console.log('[Google Sheet Log Status]:', sheetRes.statusCode);
+            // Handle redirect if Google Apps Script redirects (302)
+            if (sheetRes.statusCode === 302 || sheetRes.statusCode === 301) {
+                const redirectUrl = sheetRes.headers.location;
+                if (redirectUrl) {
+                    postToGoogleSheet(redirectUrl, payload);
+                }
+            }
+        });
+
+        sheetReq.on('error', (err) => {
+            console.warn('[Google Sheet Log Error]:', err.message);
+        });
+
+        sheetReq.write(postData);
+        sheetReq.end();
+    } catch (err) {
+        console.warn('[Google Sheet Exception]:', err.message);
+    }
+}
+
 const server = http.createServer((req, res) => {
     const parsedUrl = url.parse(req.url, true);
     const pathname = parsedUrl.pathname;
@@ -75,7 +114,12 @@ const server = http.createServer((req, res) => {
             let bodyParams = {};
             try { bodyParams = JSON.parse(bodyStr); } catch (e) {}
 
+            const name = bodyParams.name || parsedUrl.query.name || '';
             const phone = bodyParams.phone || parsedUrl.query.phone || '';
+            const email = bodyParams.email || parsedUrl.query.email || '';
+            const location = bodyParams.location || parsedUrl.query.location || '';
+            const knowsChallenge = bodyParams.knowsChallenge || parsedUrl.query.knowsChallenge || '';
+
             const network = bodyParams.network || parsedUrl.query.network || '01';
             const amount = bodyParams.amount || parsedUrl.query.amount || '200';
 
@@ -90,7 +134,6 @@ const server = http.createServer((req, res) => {
                 cleanPhone = '0' + cleanPhone.slice(3);
             }
 
-            // Securely read credentials from Environment Variables
             const userId = process.env.CLUBKONNECT_USER_ID || 'CK101284801';
             const apiKey = process.env.CLUBKONNECT_API_KEY || '5G2TFK1JZGX63T1J53U2TXY3732UT86155EK6R6ZI8LV8T72J63FCINN270U58K1';
             const requestId = 'POWEROIL_' + Date.now() + Math.floor(Math.random() * 1000);
@@ -115,8 +158,7 @@ const server = http.createServer((req, res) => {
 
                     const isSuccess = jsonResp.statuscode === '100' || jsonResp.status === 'ORDER_RECEIVED' || jsonResp.status === 'ORDER_COMPLETED';
 
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({
+                    const responsePayload = {
                         success: isSuccess,
                         status: jsonResp.status || (isSuccess ? 'ORDER_RECEIVED' : 'FAILED'),
                         statusCode: jsonResp.statuscode,
@@ -125,7 +167,27 @@ const server = http.createServer((req, res) => {
                         network: jsonResp.mobilenetwork || network,
                         orderId: jsonResp.orderid || requestId,
                         walletBalance: jsonResp.walletbalance
-                    }));
+                    };
+
+                    // Automatically save submission data to Google Sheet if URL is configured
+                    const googleSheetUrl = process.env.GOOGLE_SHEET_WEBHOOK_URL;
+                    if (googleSheetUrl) {
+                        postToGoogleSheet(googleSheetUrl, {
+                            timestamp: new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' }),
+                            name: name,
+                            phone: cleanPhone,
+                            email: email,
+                            location: location,
+                            knowsChallenge: knowsChallenge,
+                            network: jsonResp.mobilenetwork || network,
+                            amount: '₦' + amount,
+                            orderId: jsonResp.orderid || requestId,
+                            airtimeStatus: isSuccess ? 'DISPATCHED' : 'FAILED'
+                        });
+                    }
+
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify(responsePayload));
                 });
             }).on('error', (err) => {
                 console.error('[Clubkonnect Proxy Error]:', err);
