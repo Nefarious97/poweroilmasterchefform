@@ -1,6 +1,6 @@
 /**
  * Power Oil MasterChef - Clubkonnect Airtime API & Google Sheet Integration Server
- * Includes Automated Keep-Alive Pinger to Prevent Render Server Sleep
+ * Includes Duplicate Phone & Email Prevention + Server Keep-Alive Pinger
  */
 
 const http = require('http');
@@ -31,7 +31,42 @@ if (fs.existsSync(envPath)) {
 }
 
 const PORT = process.env.PORT || 8085;
-const PING_INTERVAL_MS = (parseInt(process.env.PING_INTERVAL_SECONDS, 10) || 15) * 1000; // Default 15 seconds
+const PING_INTERVAL_MS = (parseInt(process.env.PING_INTERVAL_SECONDS, 10) || 15) * 1000;
+
+// Duplicate Prevention Storage (Persisted to submissions.json)
+const SUBMISSIONS_FILE = path.join(__dirname, 'submissions.json');
+const claimedPhones = new Set();
+const claimedEmails = new Set();
+
+function loadSubmissions() {
+    try {
+        if (fs.existsSync(SUBMISSIONS_FILE)) {
+            const raw = fs.readFileSync(SUBMISSIONS_FILE, 'utf8');
+            const data = JSON.parse(raw);
+            (data.phones || []).forEach(p => claimedPhones.add(p));
+            (data.emails || []).forEach(e => claimedEmails.add(e.toLowerCase()));
+            console.log(`[Duplicate Protection] Loaded ${claimedPhones.size} claimed phones and ${claimedEmails.size} claimed emails.`);
+        }
+    } catch (e) {
+        console.warn('Failed to load submissions storage:', e.message);
+    }
+}
+
+function saveSubmissionRecord(phone, email) {
+    if (phone) claimedPhones.add(phone);
+    if (email) claimedEmails.add(email.toLowerCase());
+    try {
+        fs.writeFileSync(SUBMISSIONS_FILE, JSON.stringify({
+            phones: Array.from(claimedPhones),
+            emails: Array.from(claimedEmails)
+        }, null, 2));
+    } catch (e) {
+        console.warn('Failed to save submission storage:', e.message);
+    }
+}
+
+// Load existing claimed records on server startup
+loadSubmissions();
 
 // MIME Types Map
 const MIME_TYPES = {
@@ -94,7 +129,7 @@ const server = http.createServer((req, res) => {
 
             const name = bodyParams.name || parsedUrl.query.name || '';
             const phone = bodyParams.phone || parsedUrl.query.phone || '';
-            const email = bodyParams.email || parsedUrl.query.email || '';
+            const email = (bodyParams.email || parsedUrl.query.email || '').trim();
             const location = bodyParams.location || parsedUrl.query.location || '';
             const knowsChallenge = bodyParams.knowsChallenge || parsedUrl.query.knowsChallenge || '';
 
@@ -107,11 +142,36 @@ const server = http.createServer((req, res) => {
                 return;
             }
 
+            // Normalize phone number to 11 digits (e.g. 08031234567)
             let cleanPhone = phone.replace(/[^0-9]/g, '');
             if (cleanPhone.startsWith('234')) {
                 cleanPhone = '0' + cleanPhone.slice(3);
             }
 
+            // --- DUPLICATE CHECKING LOGIC ---
+            if (claimedPhones.has(cleanPhone)) {
+                console.warn(`[Duplicate Blocked] Phone ${cleanPhone} has already claimed airtime.`);
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: false,
+                    duplicate: true,
+                    message: `The phone number ${cleanPhone} has already claimed an airtime reward!`
+                }));
+                return;
+            }
+
+            if (email && claimedEmails.has(email.toLowerCase())) {
+                console.warn(`[Duplicate Blocked] Email ${email} has already claimed airtime.`);
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: false,
+                    duplicate: true,
+                    message: `The email address ${email} has already claimed an airtime reward!`
+                }));
+                return;
+            }
+
+            // Process Airtime API Call via Clubkonnect / Nellobyte
             const userId = process.env.CLUBKONNECT_USER_ID || 'CK101284801';
             const apiKey = process.env.CLUBKONNECT_API_KEY || '5G2TFK1JZGX63T1J53U2TXY3732UT86155EK6R6ZI8LV8T72J63FCINN270U58K1';
             const requestId = 'POWEROIL_' + Date.now() + Math.floor(Math.random() * 1000);
@@ -136,6 +196,11 @@ const server = http.createServer((req, res) => {
 
                     const isSuccess = jsonResp.statuscode === '100' || jsonResp.status === 'ORDER_RECEIVED' || jsonResp.status === 'ORDER_COMPLETED';
 
+                    if (isSuccess) {
+                        // Register phone & email in duplicate prevention record
+                        saveSubmissionRecord(cleanPhone, email);
+                    }
+
                     const responsePayload = {
                         success: isSuccess,
                         status: jsonResp.status || (isSuccess ? 'ORDER_RECEIVED' : 'FAILED'),
@@ -144,7 +209,8 @@ const server = http.createServer((req, res) => {
                         phone: cleanPhone,
                         network: jsonResp.mobilenetwork || network,
                         orderId: jsonResp.orderid || requestId,
-                        walletBalance: jsonResp.walletbalance
+                        walletBalance: jsonResp.walletbalance,
+                        message: isSuccess ? 'Airtime dispatched successfully!' : 'Airtime dispatch failed'
                     };
 
                     // Automatically post submission to Google Sheet Webhook
@@ -197,20 +263,19 @@ const server = http.createServer((req, res) => {
     });
 });
 
-// Automated Keep-Alive Pinger Loop (Runs every 15 seconds)
+// Automated Keep-Alive Pinger Loop
 function startKeepAlivePinger() {
     setInterval(() => {
         const renderUrl = process.env.RENDER_EXTERNAL_URL || `http://127.0.0.1:${PORT}/healthz`;
         const pinger = renderUrl.startsWith('https') ? https : http;
         
-        pinger.get(renderUrl, (res) => {
-            // Self-ping keeping server awake
-        }).on('error', () => {});
+        pinger.get(renderUrl, () => {}).on('error', () => {});
     }, PING_INTERVAL_MS);
 }
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Power Oil MasterChef Ad Server running on port ${PORT}`);
+    console.log(`[Duplicate Protection] Active. Prevents duplicate phone & email claims.`);
     console.log(`[Keep-Alive] Automated self-pinger active every ${PING_INTERVAL_MS / 1000} seconds.`);
     startKeepAlivePinger();
 });

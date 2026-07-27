@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const toast = document.getElementById('toast');
     const rewardModal = document.getElementById('rewardModal');
     const closeModalBtn = document.getElementById('closeModalBtn');
+    const modalTitle = document.getElementById('modalTitle');
     const modalDesc = document.getElementById('modalDesc');
 
     let selectedAnswer = null;
@@ -18,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         toast.classList.add('show');
         setTimeout(() => {
             toast.classList.remove('show');
-        }, 3200);
+        }, 3500);
     }
 
     // Toggle Yes / No Selection
@@ -101,8 +102,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             });
 
-            if (res.ok) {
-                const data = await res.json();
+            const data = await res.json().catch(() => null);
+
+            if (res.status === 400 && data && data.duplicate) {
+                return {
+                    success: false,
+                    duplicate: true,
+                    message: data.message || 'This phone number or email has already claimed an airtime reward.'
+                };
+            }
+
+            if (res.ok && data) {
                 return {
                     success: data.success,
                     network: data.network || networkInfo.name,
@@ -179,7 +189,22 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.style.opacity = '1';
         submitBtn.style.pointerEvents = 'auto';
 
+        // Check if duplicate claim blocked
+        if (result.duplicate) {
+            showToast(result.message);
+            modalTitle.textContent = 'Reward Already Claimed ⚠️';
+            modalDesc.innerHTML = `
+                Sorry <strong>${name}</strong>!<br><br>
+                ${result.message}<br><br>
+                Each participant can only claim ₦200 airtime reward once.
+            `;
+            rewardModal.classList.add('active');
+            rewardModal.setAttribute('aria-hidden', 'false');
+            return;
+        }
+
         // Display Success Modal
+        modalTitle.textContent = 'Thank You! 🎉';
         modalDesc.innerHTML = `
             Congratulations <strong>${name}</strong>!<br>
             Your response (<em>${selectedAnswer}</em>) has been recorded.<br><br>
