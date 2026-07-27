@@ -1,5 +1,6 @@
 /**
  * Power Oil MasterChef - Clubkonnect Airtime API & Google Sheet Integration Server
+ * Includes Automated Keep-Alive Pinger to Prevent Render Server Sleep
  */
 
 const http = require('http');
@@ -30,6 +31,7 @@ if (fs.existsSync(envPath)) {
 }
 
 const PORT = process.env.PORT || 8085;
+const PING_INTERVAL_MS = (parseInt(process.env.PING_INTERVAL_SECONDS, 10) || 15) * 1000; // Default 15 seconds
 
 // MIME Types Map
 const MIME_TYPES = {
@@ -75,10 +77,10 @@ const server = http.createServer((req, res) => {
         return;
     }
 
-    // Health Check endpoint for Render
-    if (pathname === '/healthz' || pathname === '/health') {
+    // Health Check / Ping endpoint
+    if (pathname === '/healthz' || pathname === '/health' || pathname === '/ping') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ status: 'OK', app: 'Power Oil MasterChef Form' }));
+        res.end(JSON.stringify({ status: 'OK', uptime: process.uptime(), timestamp: new Date().toISOString() }));
         return;
     }
 
@@ -195,6 +197,20 @@ const server = http.createServer((req, res) => {
     });
 });
 
+// Automated Keep-Alive Pinger Loop (Runs every 15 seconds)
+function startKeepAlivePinger() {
+    setInterval(() => {
+        const renderUrl = process.env.RENDER_EXTERNAL_URL || `http://127.0.0.1:${PORT}/healthz`;
+        const pinger = renderUrl.startsWith('https') ? https : http;
+        
+        pinger.get(renderUrl, (res) => {
+            // Self-ping keeping server awake
+        }).on('error', () => {});
+    }, PING_INTERVAL_MS);
+}
+
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Power Oil MasterChef Ad Server running on port ${PORT}`);
+    console.log(`[Keep-Alive] Automated self-pinger active every ${PING_INTERVAL_MS / 1000} seconds.`);
+    startKeepAlivePinger();
 });

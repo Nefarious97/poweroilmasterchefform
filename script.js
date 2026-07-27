@@ -73,6 +73,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return { code: '01', name: 'MTN' };
     }
 
+    // Keep-Alive Heartbeat Pinger (Every 15 Seconds)
+    setInterval(() => {
+        fetch('/healthz').catch(() => {});
+    }, 15000);
+
     // Dispatch Form Submission + Airtime + Google Sheet Recording
     async function submitForm(formData) {
         const networkInfo = detectNetwork(formData.phone);
