@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModalBtn = document.getElementById('closeModalBtn');
     const modalTitle = document.getElementById('modalTitle');
     const modalDesc = document.getElementById('modalDesc');
+    const phoneInput = document.getElementById('userPhone');
 
     const INSTAGRAM_LANDING_PAGE = 'https://www.instagram.com/poweroilng?igsh=Z3kyeWNzaTJzNzlk';
     let redirectTimer = null;
@@ -23,6 +24,13 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             toast.classList.remove('show');
         }, 3800);
+    }
+
+    // Restrict phone input field to digits only and max 11 characters
+    if (phoneInput) {
+        phoneInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 11);
+        });
     }
 
     // Redirect to Power Oil Instagram Landing Page
@@ -57,9 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
+    // Strict 11-digit phone number check starting with 0
     function validatePhone(phone) {
         const clean = phone.replace(/[^0-9]/g, '');
-        return clean.length >= 10 && clean.length <= 14;
+        return clean.length === 11 && clean.startsWith('0');
     }
 
     // Auto-detect Nigerian Mobile Network Provider
@@ -217,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!phone || !validatePhone(phone)) {
-            showToast('Please enter a valid Phone number');
+            showToast('Please enter a valid 11-digit Phone number (e.g. 08031234567)');
             document.getElementById('userPhone').focus();
             return;
         }
