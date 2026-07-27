@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=320, height=480, initial-scale=1.0, user-scalable=no">
@@ -8,12 +7,11 @@
     <meta name="description" content="Power Oil MasterChef Challenge Interactive Form 320x480">
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
     <!-- 320x480 Creative Ad Container - Top Left -->
     <main class="app-container" id="app">
-
+        
         <!-- Toast Warning Message -->
         <div id="toast" class="toast-msg" role="alert" aria-live="assertive">Please select Yes or No</div>
 
@@ -24,18 +22,16 @@
 
         <!-- Main Form -->
         <form id="masterchefForm" novalidate>
-
+            
             <!-- Dark Green Question Card -->
             <section class="question-card" aria-label="Survey Question">
                 <h2 class="question-text">Do you know about the Power Oil MasterChef Challenge?</h2>
-
+                
                 <div class="choice-buttons">
-                    <button type="button" class="choice-btn choice-btn-yes" id="btnYes" data-value="Yes"
-                        aria-pressed="false">
+                    <button type="button" class="choice-btn choice-btn-yes" id="btnYes" data-value="Yes" aria-pressed="false">
                         Yes
                     </button>
-                    <button type="button" class="choice-btn choice-btn-no" id="btnNo" data-value="No"
-                        aria-pressed="false">
+                    <button type="button" class="choice-btn choice-btn-no" id="btnNo" data-value="No" aria-pressed="false">
                         No
                     </button>
                 </div>
@@ -44,53 +40,76 @@
 
             <!-- White Input Pills Container -->
             <section class="inputs-container" aria-label="Contact Details">
-
+                
                 <!-- Name Pill -->
                 <div class="input-pill">
                     <span class="pill-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24">
-                            <path
-                                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                        </svg>
+                        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                     </span>
-                    <input type="text" id="userName" name="name" class="pill-input" placeholder="Name" required
-                        autocomplete="name" aria-label="Name">
+                    <input type="text" id="userName" name="name" class="pill-input" placeholder="Name" required autocomplete="name" aria-label="Name">
                 </div>
 
                 <!-- Phone Pill -->
                 <div class="input-pill">
                     <span class="pill-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24">
-                            <path
-                                d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-                        </svg>
+                        <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
                     </span>
-                    <input type="tel" id="userPhone" name="phone" class="pill-input" placeholder="Phone number" required
-                        autocomplete="tel" aria-label="Phone number">
+                    <input type="tel" id="userPhone" name="phone" class="pill-input" placeholder="Phone number" required autocomplete="tel" aria-label="Phone number">
                 </div>
 
                 <!-- Email Pill -->
                 <div class="input-pill">
                     <span class="pill-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24">
-                            <path
-                                d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-                        </svg>
+                        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
                     </span>
-                    <input type="email" id="userEmail" name="email" class="pill-input" placeholder="Email" required
-                        autocomplete="email" aria-label="Email">
+                    <input type="email" id="userEmail" name="email" class="pill-input" placeholder="Email" required autocomplete="email" aria-label="Email">
                 </div>
 
-                <!-- Location Pill -->
+                <!-- Location Select Dropdown Pill (Nigerian States) -->
                 <div class="input-pill">
                     <span class="pill-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24">
-                            <path
-                                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                        </svg>
+                        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                     </span>
-                    <input type="text" id="userLocation" name="location" class="pill-input" placeholder="Location"
-                        required autocomplete="address-level2" aria-label="Location">
+                    <select id="userLocation" name="location" class="pill-input pill-select" required aria-label="Location State">
+                        <option value="" disabled selected hidden>Location (Select State)</option>
+                        <option value="Abia">Abia</option>
+                        <option value="Adamawa">Adamawa</option>
+                        <option value="Akwa Ibom">Akwa Ibom</option>
+                        <option value="Anambra">Anambra</option>
+                        <option value="Bauchi">Bauchi</option>
+                        <option value="Bayelsa">Bayelsa</option>
+                        <option value="Benue">Benue</option>
+                        <option value="Borno">Borno</option>
+                        <option value="Cross River">Cross River</option>
+                        <option value="Delta">Delta</option>
+                        <option value="Ebonyi">Ebonyi</option>
+                        <option value="Edo">Edo</option>
+                        <option value="Ekiti">Ekiti</option>
+                        <option value="Enugu">Enugu</option>
+                        <option value="FCT - Abuja">FCT - Abuja</option>
+                        <option value="Gombe">Gombe</option>
+                        <option value="Imo">Imo</option>
+                        <option value="Jigawa">Jigawa</option>
+                        <option value="Kaduna">Kaduna</option>
+                        <option value="Kano">Kano</option>
+                        <option value="Katsina">Katsina</option>
+                        <option value="Kebbi">Kebbi</option>
+                        <option value="Kogi">Kogi</option>
+                        <option value="Kwara">Kwara</option>
+                        <option value="Lagos">Lagos</option>
+                        <option value="Nasarawa">Nasarawa</option>
+                        <option value="Niger">Niger</option>
+                        <option value="Ogun">Ogun</option>
+                        <option value="Ondo">Ondo</option>
+                        <option value="Osun">Osun</option>
+                        <option value="Oyo">Oyo</option>
+                        <option value="Plateau">Plateau</option>
+                        <option value="Rivers">Rivers</option>
+                        <option value="Sokoto">Sokoto</option>
+                        <option value="Taraba">Taraba</option>
+                        <option value="Yobe">Yobe</option>
+                        <option value="Zamfara">Zamfara</option>
+                    </select>
                 </div>
 
             </section>
@@ -118,5 +137,4 @@
 
     <script src="script.js"></script>
 </body>
-
 </html>

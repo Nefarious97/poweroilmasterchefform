@@ -147,7 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const name = document.getElementById('userName').value.trim();
         const phone = document.getElementById('userPhone').value.trim();
         const email = document.getElementById('userEmail').value.trim();
-        const location = document.getElementById('userLocation').value.trim();
+        const locationSelect = document.getElementById('userLocation');
+        const location = locationSelect.value.trim();
 
         if (!name) {
             showToast('Please enter your Name');
@@ -168,8 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!location) {
-            showToast('Please enter your Location');
-            document.getElementById('userLocation').focus();
+            showToast('Please select your Location State');
+            locationSelect.focus();
             return;
         }
 

@@ -57,7 +57,6 @@ body {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
-
 /* Dark Green Question Card Container */
 .question-card {
     position: absolute;
@@ -198,6 +197,28 @@ body {
 .pill-input::placeholder {
     color: #777777;
     font-family: 'FruitySmoothie', sans-serif;
+    font-size: 11px;
+}
+
+/* Location Select Dropdown Custom Styling */
+.pill-select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: url("data:image/svg+xml;utf8,<svg fill='%23043217' height='14' viewBox='0 0 24 24' width='14' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>") no-repeat right 6px center;
+    padding-right: 18px;
+}
+
+.pill-select:invalid,
+.pill-select option[value=""] {
+    color: #777777;
+}
+
+.pill-select option {
+    color: #043217;
+    background: #ffffff;
+    font-family: sans-serif;
     font-size: 11px;
 }
 
